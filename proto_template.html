@@ -1,0 +1,41 @@
+<div id="philoneous">
+    <ph-experiment>
+        <h1> My experiment summary </h1>
+        <h3> Overall performance by f1 </h3>
+        {{ $experiment.plots.overall_performance_by_score.f1 }}
+        <ph-best-model metric="f1">
+            <h2> Performance for best model according to f1</h2>
+            {{ $model.metadata.summary }}
+            f1 score: {{ $model.scores.f1 }}<br>
+            prec at 1 percent: {{ $model.scores.precision-at-x_percent(1) }}<br>
+            prec at 5 percent: {{ $model.scores.precision-at-x_percent(5) }}<br>
+            <h3> Top features </h3>
+            {{ $model.plots.top-n-features(10) }}
+            <h3> ROC </h3>
+            {{ $model.plots.roc }}
+            <h3> confusion </h3>
+            {{ $model.plots.confusion }}
+            <h3> Average score grouped by ethnicity </h3>
+            {{ $model.test_set.select(
+                          "SELECT 
+                               ethnicity, 
+                               AVG(predicted_probability) AS pred_proba
+                           FROM 
+                               test 
+                           GROUP BY 
+                               ethnicity 
+                           ORDER BY 
+                               pred_proba DESC
+                           LIMIT 1;") }} 
+        </ph-best-model>
+        <ph-for-each-model sort-by="$model.scores.f1" limit="10">
+            <h2> 
+                Model: {{ $model.metadata.name }} 
+                run at: {{ $model.metadata.time }}
+            </h2>
+            f1: {{ $model.scores.f1 }}<br>
+            top features: {{ $model.top-n-features(10) }}<br>
+            {{ $model.metadata.summary }}
+        </ph-for-each-model>
+    </ph-experiment>
+</div>
